@@ -10,6 +10,8 @@
     <UButton>Login</UButton>
 </div>
 
+<UButton to="/tutorial">Tutorial</UButton>
+
 </div>
 </template>
 
