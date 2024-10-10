@@ -1,6 +1,6 @@
 <template>
   <Navbar />
-  <UContainer>
-      <NuxtPage />
-  </UContainer>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
