@@ -1,21 +1,55 @@
 <template>
-    <nav class="bg-white shadow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <UButton to="/" size="sm" variant="link" label="Bulls and Cows" />
-          </div>
-          <div class="hidden md:flex items-center space-x-4">
-            <UButton to="/tutorial" size="sm" variant="link" label="Tutorial" />
-            <UButton to="/leaderboard" size="sm" variant="link" label="Leaderboard" />
-            <UButton to="/play" size="sm" color="primary" label="Play" />
-            <UButton icon="i-heroicons-user-circle-solid" size="sm" variant="link" />
-          </div>
+  <nav class="bg-white p-8 font-custom border-b-4 border-black">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center">
+        <NuxtLink to="/" class="text-4xl font-bold text-white bg-yellow-400 px-4 py-2 border-4 border-black shadow-[4px_4px_0_0_#000]">
+          B&C
+        </NuxtLink>
+        
+        <div class="hidden md:flex space-x-4">
+          <NuxtLink
+            v-for="item in menuItems"
+            :key="item.href"
+            :to="item.href"
+            class="flex items-center bg-pink-400 text-white px-4 py-2 text-xl border-4 border-black shadow-[4px_4px_0_0_#000] hover:bg-pink-500 transition-colors active:shadow-none active:translate-x-1 active:translate-y-1"
+          >
+            <Icon :name="item.icon" class="w-6 h-6 mr-2" />
+            {{ item.label }}
+          </NuxtLink>
         </div>
+        
+        <button
+          @click="isMenuOpen = !isMenuOpen"
+          class="md:hidden bg-green-500 text-white p-2 border-4 border-black shadow-[4px_4px_0_0_#000] hover:bg-green-600 transition-colors active:shadow-none active:translate-x-1 active:translate-y-1"
+        >
+          <Icon name="lucide:menu" class="w-8 h-8" />
+        </button>
       </div>
-    </nav>
-  </template>
-  
-  <script setup lang="ts">
-  import { UButton } from '#components';
-  </script>
+      
+      <div v-if="isMenuOpen" class="mt-4 md:hidden">
+        <NuxtLink
+          v-for="item in menuItems"
+          :key="item.href"
+          :to="item.href"
+          class="flex items-center bg-pink-400 text-white px-4 py-2 text-xl border-4 border-black shadow-[4px_4px_0_0_#000] hover:bg-pink-500 transition-colors active:shadow-none active:translate-x-1 active:translate-y-1 mb-2 w-full"
+        >
+          <Icon :name="item.icon" class="w-6 h-6 mr-2" />
+          {{ item.label }}
+        </NuxtLink>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const isMenuOpen = ref(false)
+
+const menuItems = [
+  { href: '/', icon: 'lucide:home', label: 'Home' },
+  { href: '/leaderboard', icon: 'lucide:trophy', label: 'Leaderboard' },
+  { href: '/help', icon: 'lucide:help-circle', label: 'Help' },
+  { href: '/settings', icon: 'lucide:settings', label: 'Settings' },
+]
+</script>
