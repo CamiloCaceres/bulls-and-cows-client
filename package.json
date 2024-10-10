@@ -11,7 +11,9 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@nuxt/fonts": "^0.10.0",
     "@nuxt/ui": "^2.17.0",
+    "@nuxtjs/tailwindcss": "^6.12.1",
     "nuxt": "^3.12.3"
   }
 }
