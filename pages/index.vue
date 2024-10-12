@@ -7,6 +7,7 @@
 <UButton to="/games/new">
     Play now
 </UButton>
+<UButton to="/games/create">Create Game</UButton>
 <div class="flex">
     <UButton variant="outline">Sign Up</UButton>
     <UButton>Login</UButton>

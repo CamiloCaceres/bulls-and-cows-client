@@ -1,62 +1,96 @@
+<!-- components/BullsAndCowsGame.vue -->
 <template>
-    <div class="">
-      <div class="max-w-4xl mx-auto">
-        <h1 class="text-6xl font-bold mb-8 text-blue-600 bg-white p-4 border-4 border-black shadow-[8px_8px_0_0_#000]">
-          Bulls and Cows
-        </h1>
-        
-        <div class="bg-pink-400 p-6 mb-8 border-4 border-black shadow-[8px_8px_0_0_#000]">
-          <input
-            type="text"
-            maxlength="4"
-            v-model="guess"
-            class="w-full text-4xl p-4 mb-4 bg-white border-4 border-black focus:outline-none focus:ring-4 focus:ring-blue-600"
-            placeholder="Enter 4-digit guess"
-          />
-          <button
-            @click="handleGuess"
-            class="w-full bg-main text-white text-2xl p-4 border-4 border-black hover:bg-green-600 transition-colors shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-x-1 active:translate-y-1"
-          >
-            Submit Guess
-          </button>
-        </div>
-        
-        <div class="bg-blue-500 p-6 border-4 border-black shadow-[8px_8px_0_0_#000]">
-          <h2 class="text-4xl font-bold mb-4 text-white">Attempts</h2>
-          <div v-for="(attempt, index) in attempts" :key="index" class="flex justify-between items-center mb-4 bg-white p-4 border-4 border-black">
-            <span class="text-3xl">{{ attempt }}</span>
-            <div class="flex space-x-4">
-              <span class="flex items-center text-2xl">
-                <Icon name="lucide:check" class="w-8 h-8 text-green-500 mr-2" /> {{ feedback[index].bulls }}
-              </span>
-              <span class="flex items-center text-2xl">
-                <Icon name="lucide:x" class="w-8 h-8 text-red-500 mr-2" /> {{ feedback[index].cows }}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <button
-          class="mt-8 bg-purple-500 text-white text-2xl p-4 border-4 border-black hover:bg-purple-600 transition-colors shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-x-1 active:translate-y-1 flex items-center justify-center w-full"
-        >
-          <Icon name="lucide:refresh-cw" class="w-8 h-8 mr-2" /> New Game
-        </button>
+  <div>
+    <h1>Bulls and Cows Game</h1>
+    <div v-if="!currentGame">
+      <button @click="startSinglePlayerGame">Start Single Player Game</button>
+      <button @click="startMultiplayerGame">Create Multiplayer Game</button>
+      <div>
+        <input v-model="gameIdToJoin" placeholder="Enter game ID to join" />
+        <button @click="joinGame">Join Game</button>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  
-  const guess = ref('')
-  const attempts = ref([])
-  const feedback = ref([])
-  
-  const handleGuess = () => {
-    // This is where you'd implement the game logic
-    // For now, we'll just add the guess to the attempts
-    attempts.value.push(guess.value)
-    feedback.value.push({ bulls: Math.floor(Math.random() * 5), cows: Math.floor(Math.random() * 5) })
-    guess.value = ''
+    <div v-else>
+      <p>Game ID: {{ currentGame.id }}</p>
+      <p>Game Type: {{ currentGame.game_type }}</p>
+      <p>Game Status: {{ currentGame.status }}</p>
+      <p v-if="currentGame.winner">Winner: {{ currentGame.winner === currentUser?.id ? 'You' : 'Opponent' }}</p>
+      <div v-if="isPlayerTurn && currentGame.status === 'active'">
+        <input v-model="currentGuess" maxlength="4" pattern="\d*"/>
+        <button @click="submitGuess" :disabled="currentGuess.length !== 4">Submit Guess</button>
+      </div>
+      <div v-else-if="currentGame.status === 'active'">
+        Waiting for opponent's move...
+      </div>
+      <ul>
+        <li v-for="guess in guesses" :key="guess.id">
+          Player: {{ guess.player === currentUser?.id ? 'You' : 'Opponent' }}
+          Guess: {{ guess.number }} - Bulls: {{ guess.bulls }}, Cows: {{ guess.cows }}
+          (Time: {{ guess.time_taken.toFixed(2) }}s)
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useGameLogic } from '../../composables/useGameLogic'
+
+const { 
+  currentGame, 
+  gamePlayers, 
+  guesses, 
+  isPlayerTurn, 
+  createSinglePlayerGame, 
+  createMultiplayerGame, 
+  joinMultiplayerGame, 
+  makeGuess,
+  fetchGameState 
+} = useGameLogic()
+
+const { pb, currentUser } = usePocketBase()
+
+const currentGuess = ref('')
+const gameIdToJoin = ref('')
+
+const startSinglePlayerGame = async () => {
+  await createSinglePlayerGame()
+}
+
+const startMultiplayerGame = async () => {
+  await createMultiplayerGame()
+}
+
+const joinGame = async () => {
+  if (gameIdToJoin.value) {
+    try {
+      await joinMultiplayerGame(gameIdToJoin.value)
+    } catch (error) {
+      console.error('Failed to join game:', error)
+      // Handle error (e.g., show error message to user)
+    }
   }
-  </script>
+}
+
+const submitGuess = async () => {
+  if (currentGuess.value.length === 4) {
+    await makeGuess(currentGuess.value)
+    currentGuess.value = ''
+  }
+}
+
+// Set up real-time subscription for game updates
+onMounted(() => {
+  if (currentGame.value) {
+    const gameId = currentGame.value.id
+    pb.collection("games").subscribe(gameId, async (e: any) => {
+      if (e.action === "update") {
+        await fetchGameState();
+      }
+    })
+
+    return () => pb.collection("games").unsubscribe(gameId);
+  }
+});
+</script>
