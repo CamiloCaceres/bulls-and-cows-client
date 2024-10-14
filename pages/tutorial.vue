@@ -22,7 +22,7 @@
           The game will score your guess:
           <ul>
             <li>
-              A "bull" (🐃) is a digit that is correct and in the right
+              A "bull" (🎯) is a digit that is correct and in the right
               position.
             </li>
             <li>
@@ -53,19 +53,19 @@
         <tbody>
           <tr>
             <td>1234</td>
-            <td>🐮🐃</td>
+            <td>🐮🎯</td>
           </tr>
           <tr>
             <td>4130</td>
-            <td>🐃🐮</td>
+            <td>🎯🐮</td>
           </tr>
           <tr>
             <td>4237</td>
-            <td>🐃🐃🐮</td>
+            <td>🎯🎯🐮</td>
           </tr>
           <tr>
             <td>4271</td>
-            <td>🐃🐃🐃🐃</td>
+            <td>🎯🎯🎯🎯</td>
           </tr>
         </tbody>
       </table>

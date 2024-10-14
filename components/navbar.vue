@@ -7,15 +7,7 @@
         </NuxtLink>
         
         <div class="hidden md:flex space-x-4">
-          <NuxtLink
-            v-for="item in menuItems"
-            :key="item.href"
-            :to="item.href"
-            class="flex items-center bg-pink-400 text-white px-4 py-2 text-xl border-4 border-black shadow-[4px_4px_0_0_#000] hover:bg-pink-500 transition-colors active:shadow-none active:translate-x-1 active:translate-y-1"
-          >
-            <Icon :name="item.icon" class="w-6 h-6 mr-2" />
-            {{ item.label }}
-          </NuxtLink>
+
         </div>
         
         <User />
@@ -47,10 +39,5 @@ import { ref } from 'vue'
 
 const isMenuOpen = ref(false)
 
-const menuItems = [
-  { href: '/', icon: 'lucide:home', label: 'Home' },
-  { href: '/leaderboard', icon: 'lucide:trophy', label: 'Leaderboard' },
-  { href: '/help', icon: 'lucide:help-circle', label: 'Help' },
-  { href: '/settings', icon: 'lucide:settings', label: 'Settings' },
-]
+
 </script>
