@@ -1,21 +1,16 @@
 <template>
-  <div class="container mx-auto mt-8 p-4">
+  <UContainer>
     <h1 class="text-3xl font-bold mb-6">Create a New Game</h1>
     <div class="flex flex-col space-y-4">
-      <button
-        @click="handleCreateSinglePlayerGame"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-      >
-        Create Single Player Game
-      </button>
-      <button
-        @click="handleCreateMultiplayerGame"
-        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-      >
+      <UButton variant="neobrutalist" :loading="isCreatingGame" @click="handleCreateSinglePlayerGame">
+        Start Single Player Game
+      </UButton>
+<!--       <UButton disabled class="cursor-not-allowed hover:bg-bg hover:text-text" variant="neobrutalist" @click="handleCreateMultiplayerGame">
         Create Multiplayer Game
-      </button>
+      </UButton>
+ -->
     </div>
-  </div>
+  </UContainer>
 </template>
 
 <script setup>
@@ -23,15 +18,17 @@ import { useRouter } from 'vue-router';
 import { useGameLogic } from '~/composables/useGameLogic';
 
 const router = useRouter();
-const { createSinglePlayerGame, createMultiplayerGame } = useGameLogic();
+const { createSinglePlayerGame, createMultiplayerGame, currentGame } = useGameLogic();
+const isCreatingGame = ref(false);
 
 const handleCreateSinglePlayerGame = async () => {
+  isCreatingGame.value = true;
   const game = await createSinglePlayerGame();
-  router.push(`/games/${game.id}`);
+  router.push(`/games/${game.id}/play`);
 };
 
 const handleCreateMultiplayerGame = async () => {
-  const game = await createMultiplayerGame();
-  router.push(`/games/${game.id}/room`);
+  await createMultiplayerGame();
+  router.push(`/games/${currentGame.id}/`);
 };
 </script>

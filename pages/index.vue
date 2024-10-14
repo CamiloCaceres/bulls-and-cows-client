@@ -3,13 +3,9 @@
 <h1 class="my-6">bulls and cows</h1>
 
 
-
-<UButton to="/games/new">
-    Play now
-</UButton>
-<UButton to="/games/create">Create Game</UButton>
+<UButton variant="neobrutalist" to="/games/create">New Game</UButton>
 <div class="flex">
-    <UButton variant="outline">Sign Up</UButton>
+    <UButton variant="neobrutalistOutline">Sign Up</UButton>
     <UButton>Login</UButton>
 </div>
 
