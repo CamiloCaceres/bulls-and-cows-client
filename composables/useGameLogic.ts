@@ -1,5 +1,8 @@
 import { ref, computed } from "vue";
 import { usePocketBase } from "./usePocketBase";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 export const useGameLogic = () => {
   const { pb, currentUser } = usePocketBase();
@@ -95,46 +98,54 @@ export const useGameLogic = () => {
       });
     }
   };
+  
 
-  const makeGuess = async (guessNumber: string) => {
-    if (!isPlayerTurn.value || !currentGame.value) return;
-
-    const startTime = new Date();
+  const makeGuess = async (guessNumber: string, game: any) => {
 
     // Calculate bulls and cows locally
-    const { bulls, cows } = calculateBullsAndCows(guessNumber, currentGame.value.secret_number);
+    const { bulls, cows } = calculateBullsAndCows(guessNumber, game.value.secret_number);
 
     // Create the guess with the calculated bulls and cows
     const newGuess = await pb.collection("guesses").create({
-      game: currentGame.value.id,
+      game: game.value.id,
       player: currentUser.value?.id,
       number: guessNumber,
       bulls: bulls,
       cows: cows,
     });
 
-    const endTime = new Date();
-    const timeTaken = (endTime.getTime() - startTime.getTime()) / 1000;
-
-    // Update the guess with the time taken
-    await pb.collection("guesses").update(newGuess.id, {
-      time_taken: timeTaken,
-    });
-
-    guesses.value.push(newGuess);
-
     if (
-      bulls === 4 ||
-      guesses.value.length >= currentGame.value.max_attempts
+      bulls === 4
     ) {
-      await endGame(bulls === 4 ? currentUser.value?.id : null);
-    } else {
+      console.log("Game over");
+      await endGame(currentUser.value?.id, game.value.id);
+    }/*  else {
       await updateTurn();
     }
 
-    await fetchGameState();
+    await fetchGameState(); */
+    return newGuess;
   };
-
+  const endGame = async (winnerId: string | null, gameId: string) => {
+    console.log("Ending game");
+    const endTime = new Date().toISOString();
+    await pb.collection("games").update(gameId, {
+      status: "finished",
+      winner: winnerId,
+      end_time: endTime,
+    });
+    console.log("Game ended");
+    router.push(`/games/${gameId}`);
+/*     for (const gamePlayer of gamePlayers.value) {
+      await pb.collection("game_players").update(gamePlayer.id, {
+        end_time: endTime,
+        duration:
+          (new Date(endTime).getTime() -
+            new Date(gamePlayer.start_time).getTime()) /
+          1000,
+      });
+    } */
+  };
   const updateTurn = async () => {
     if (currentGame.value.game_type === "multiplayer") {
       const nextPlayer = gamePlayers.value.find(
@@ -146,24 +157,7 @@ export const useGameLogic = () => {
     }
   };
 
-  const endGame = async (winnerId: string | null) => {
-    const endTime = new Date().toISOString();
-    await pb.collection("games").update(currentGame.value.id, {
-      status: "finished",
-      winner: winnerId,
-      end_time: endTime,
-    });
 
-    for (const gamePlayer of gamePlayers.value) {
-      await pb.collection("game_players").update(gamePlayer.id, {
-        end_time: endTime,
-        duration:
-          (new Date(endTime).getTime() -
-            new Date(gamePlayer.start_time).getTime()) /
-          1000,
-      });
-    }
-  };
 
   const fetchGameState = async () => {
     if (!currentGame.value) return;
@@ -176,6 +170,7 @@ export const useGameLogic = () => {
       filter: `game = "${currentGame.value.id}"`,
       sort: "created",
     });
+    return currentGame.value
   };
 
   const calculateBullsAndCows = (guess: string, secret: number) => {
@@ -216,5 +211,6 @@ export const useGameLogic = () => {
     joinMultiplayerGame,
     makeGuess,
     fetchGameState,
+    endGame,
   };
 };
