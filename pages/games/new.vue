@@ -75,7 +75,7 @@ const joinGame = async () => {
 
 const submitGuess = async () => {
   if (currentGuess.value.length === 4) {
-    await makeGuess(currentGuess.value)
+    await makeGuess(currentGuess.value, currentGame.value)
     currentGuess.value = ''
   }
 }
